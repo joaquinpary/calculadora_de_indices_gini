@@ -11,10 +11,10 @@ def get_gini_index():
         if response.status_code == 200:
             return response.json()
         else:
-            print(f'Error al obtener informacion del indice gini. Código de estado: {response.status_code}')
+            print(f'Error obtaining the gini index data. Status code: {response.status_code}')
             return None
     except requests.exceptions.RequestException as e:
-        print(f'Error de solicitud HTTP: {e}')
+        print(f'HTTP request exception: {e}')
         return None
 
 
@@ -30,16 +30,19 @@ for i in gini_index[1]:
         country.append(i['country']['value'])
         year.append(i['date'])
         gini.append(i['value'])
-    # print(f"Pais: {i['country']['value']}")
-    # print(f"Año: {i['date']}") 
-    # print(f"Indice Gini: {i['value']}")  
-    # print("")
 
+float_to_int = ctypes.CDLL('./lib_float_to_int.so')
+float_to_int.float_to_int.argtypes = (ctypes.c_float)
+float_to_int.float_to_int.restype = ctypes.c_int
+
+def float_to_int(value):
+    return float_to_int.float_to_int(value)
+
+for i in range(len(gini)):
+    gini[i] = float_to_int(gini[i])
 
 for i in range(len(country)):
-    print(f"Pais: {country[i]}")
-    print(f"Año: {year[i]}") 
-    print(f"Indice Gini: {gini[i]}")  
+    print(f"Country: {country[i]}")
+    print(f"Year: {year[i]}") 
+    print(f"GINI index: {gini[i]}")  
     print("")
-
-    
