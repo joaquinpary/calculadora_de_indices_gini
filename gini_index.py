@@ -31,14 +31,17 @@ for i in gini_index[1]:
         year.append(i['date'])
         gini.append(i['value'])
 
-float_to_int = ctypes.CDLL('./lib_float_to_int.so')
-float_to_int.float_to_int.argtypes = (ctypes.c_float)
-float_to_int.float_to_int.restype = ctypes.c_int
+lib_float_to_int = ctypes.CDLL('./lib_float_to_int.so')
+lib_float_to_int.float_to_int.argtypes = (ctypes.c_float,)
+lib_float_to_int.float_to_int.restype = ctypes.c_int
 
 def float_to_int(value):
-    return float_to_int.float_to_int(value)
+    return lib_float_to_int.float_to_int(value)
 
 for i in range(len(gini)):
+    if gini[i] == None:
+        gini[i] = 0
+    gini[i] = float(gini[i])
     gini[i] = float_to_int(gini[i])
 
 for i in range(len(country)):

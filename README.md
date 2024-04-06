@@ -1,2 +1,7 @@
-# calculadora_de_indices_gini
-Trabajo Practico N2 de la materia Sistema de Computacion
+# Trabajo Practico N° Calculadora de Indice GINI
+
+### Integrantes:
+
+* Santiago Colque
+* Joaquin Pary
+* Jorge Angeloff
