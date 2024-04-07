@@ -59,3 +59,86 @@ Estos tienen una categoria que es la siguente:
 |3xx|Redirection|
 |4xx|Client error|
 |5xx|Server error|
+
+Posteriormente se realizo un filtrado de los datos obtenidos, se utilizo `gini_index[1]` porque en la posicion 0 se encontraba la informacion sobre la API:
+```json
+{
+    "page": 1,
+    "pages": 1,
+    "per_page": 32500,
+    "total": 2660,
+    "sourceid": "2",
+    "lastupdated": "2024-03-28"
+}
+```
+```python
+gini_index = get_gini_index()
+
+country_to_find = input("Enter country: ")
+country = []
+year = []
+gini = []
+
+for i in gini_index[1]:
+    if i['country']['value'] == country_to_find:
+        country.append(i['country']['value'])
+        year.append(i['date'])
+        gini.append(i['value'])
+```
+
+La ultima parte es donde se utiliza la libreria `ctypes` para importar una libreria dinamica de C:
+* Linkea la libreria dinamica
+```python
+lib_float_to_int = ctypes.CDLL('./lib_float_to_int.so')
+```
+* Setea el tipo de variable de entrada de la funcion `float_to_int`
+```python
+lib_float_to_int.float_to_int.argtypes = (ctypes.c_float,)
+```
+* Setea el tipo de variable de salida de la funcion `float_to_int`
+```python
+lib_float_to_int.float_to_int.restype = ctypes.c_int
+```
+Se define la funcion `float_to_int(value)`que va a llamar a la funcion (con el mismo nombre) en C:
+```python
+def float_to_int(value):
+    return lib_float_to_int.float_to_int(value)
+
+for i in range(len(gini)):
+    if gini[i] == None:
+        gini[i] = 0
+    gini[i] = float(gini[i])
+    gini[i] = float_to_int(gini[i])
+
+for i in range(len(country)):
+    print(f"Country: {country[i]}")
+    print(f"Year: {year[i]}") 
+    print(f"GINI index: {gini[i]}")  
+    print("")
+```
+
+El programa en C es muy simple actualmente, ya que solo realiza un casting sumandole `0.5` al `float`, esto se debe que al hacer un casting de `float` a `int` siempre redondea para abajo:
+```C
+#include <stdio.h>
+
+int float_to_int(float num) {
+    if (num < 0) {
+        return (int)(num - 0.5);
+    } else {
+        return (int)(num + 0.5);
+    }
+}
+```
+Este codigo C se compilo usando:
+```bash
+gcc -c -fPIC lib_float_to_int.c -o lib_float_to_int.o
+```
+```bash
+gcc -shared -W -o lib_float_to_int.so lib_float_to_int.o
+```
+## Anexo
+* https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22
+* https://realpython.com/api-integration-in-python/
+* https://es.wikipedia.org/wiki/Coeficiente_de_Gini#:~:text=El%20coeficiente%20de%20Gini%20es,cualquier%20forma%20de%20distribuci%C3%B3n%20desigual.
+* https://www.redhat.com/es/topics/api/what-is-a-rest-api
+* https://stackoverflow.com/questions/14884126/build-so-file-from-c-file-using-gcc-command-line
