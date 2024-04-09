@@ -18,7 +18,7 @@ El indice o coeficiente de GINI es una medida que normalmente se utiliza para me
 Aunque el coeficiente de GINI se ultiliza sobre todo para medir la degualdad en los ingresos, tambien puede utilizarse para medir la desigualdad en la riqueza. Este uso requiere que nadie disponga de una riqueza neta negativa.
 ## Desarrollo
 
-Para obtener los datos del Banco Mundial se utilizo Python usando la libreria `request` y el enlace a la informacion suministrada por [Banco Mundial](https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22) definiendo la siguente funcion:
+Los datos fueron obtenidos con Python utilizando la libreria `request` y el enlace a la informacion suministrada por [Banco Mundial](https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22) definiendo la siguente funcion:
 
 ```python
 def get_gini_index():
@@ -36,7 +36,7 @@ def get_gini_index():
         return None
 ```
 
-La funcion `get_gini_index()` utiliza la url de la API para intentar obtener los datos en formato JSON utilizando un try catch, el status code `200` hace referencia a una accion de request que fue exitosa, por lo tanto si `response.status_code` obtiene un valor diferente a `200`, no devuelve nada.
+La funcion `get_gini_index()` utiliza la url de la API para obtener los datos en formato JSON mediante un try catch, el status code `200` hace referencia a una accion de request que fue exitosa, por lo tanto si `response.status_code` obtiene un valor diferente a `200`, no devuelve nada.
 La siguente lista muestra los codigos de estados mas comunes:
 |Code|Meaning              |Description         |
 |--- |---------------------|--------------------|
@@ -51,7 +51,7 @@ La siguente lista muestra los codigos de estados mas comunes:
 |422 |`Unprocessable Entity`| The request data was properly formatted but contained invalid or missing data|
 |500 |`Internal Server Error`| The server threw and error when processing the request|
 
-Estos tienen una categoria que es la siguente:
+Los estados pueden clasificarse segun su categoria:
 
 |Code range| Category |
 |----------|----------|
@@ -60,7 +60,7 @@ Estos tienen una categoria que es la siguente:
 |4xx|Client error|
 |5xx|Server error|
 
-Posteriormente se realizo un filtrado de los datos obtenidos, se utilizo `gini_index[1]` porque en la posicion 0 se encontraba la informacion sobre la API:
+Posteriormente se realizo un filtrado de los datos obtenidos, se utilizo `gini_index[1]` dado que `gini_index[0]` posee informacion sobre la API:
 ```json
 {
     "page": 1,
@@ -99,7 +99,7 @@ lib_float_to_int.float_to_int.argtypes = (ctypes.c_float,)
 ```python
 lib_float_to_int.float_to_int.restype = ctypes.c_int
 ```
-Se define la funcion `float_to_int(value)`que va a llamar a la funcion (con el mismo nombre) en C:
+Se define la funcion `float_to_int(value)`la cual llamara a la funcion homonima en C:
 ```python
 def float_to_int(value):
     return lib_float_to_int.float_to_int(value)
@@ -117,7 +117,7 @@ for i in range(len(country)):
     print("")
 ```
 
-El programa en C es muy simple actualmente, ya que solo realiza un casting sumandole `0.5` al `float`, esto se debe que al hacer un casting de `float` a `int` siempre redondea para abajo:
+El programa en C es muy simple actualmente, solo realiza un casting sumandole `0.5` al `float`. Al hacer un casting de `float` a `int` siempre redondea a la baja:
 ```C
 #include <stdio.h>
 
