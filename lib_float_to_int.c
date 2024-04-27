@@ -1,9 +1,9 @@
 #include <stdio.h>
 
+extern int asm_main(float);
+
 int float_to_int(float num) {
-    if (num < 0) {
-        return (int)(num - 0.5);
-    } else {
-        return (int)(num + 0.5);
-    }
+    int int_num = 0;
+    int_num = asm_main(num);
+    return int_num;
 }
