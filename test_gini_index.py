@@ -13,9 +13,9 @@ class TestGiniIndex(unittest.TestCase):
         # Assert
         self.assertEqual(status_code, expected)
 
-    def test_float_to_int(self):
+    def test_float_to_int_negative(self):
         # Arrange
-        value = -1.3
+        value = -2.3
         
         # Act
         result = float_to_int(value)
@@ -23,25 +23,25 @@ class TestGiniIndex(unittest.TestCase):
         # Assert
         self.assertEqual(result, -1)
     
-    def test_float_to_int_negative(self):
+    def test_float_to_int_flooring(self):
         # Arrange
-        value = 0.44
-        
-        # Act
-        result = float_to_int(value)
-        
-        # Assert
-        self.assertEqual(result, 0)
-
-    def test_float_to_int_positive(self):
-        # Arrange
-        value = 1.55
+        value = 1.44
         
         # Act
         result = float_to_int(value)
         
         # Assert
         self.assertEqual(result, 2)
+
+    def test_float_to_int_ceiling(self):
+        # Arrange
+        value = 2.55
+        
+        # Act
+        result = float_to_int(value)
+        
+        # Assert
+        self.assertEqual(result, 3)
         
 if __name__ == '__main__':
     unittest.main()

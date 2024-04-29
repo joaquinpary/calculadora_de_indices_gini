@@ -42,6 +42,9 @@ for i in gini_index[1]:
         year.append(i['date'])
         gini.append(i['value'])
 
+y_plt_min = min(y for y in gini if y is not None) - 3
+y_plt_max = max(y for y in gini if y is not None) + 3
+
 for i in range(len(gini)):
     if gini[i] == None:
         gini[i] = 0
@@ -58,6 +61,8 @@ year = year[::-1]
 gini = gini[::-1]
 
 plt.bar(year, gini)
+plt.ylim(y_plt_min, y_plt_max)
+plt.xticks(year[::2])
 plt.xlabel('Year')
 plt.ylabel('GINI Index')
 plt.title(f'GINI Index for {country_to_find}')
