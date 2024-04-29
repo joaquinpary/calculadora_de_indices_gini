@@ -4,8 +4,8 @@ git-sim_media/
 
 __pycache__/
 
-.gitignore
-
 *.o
 
 *.so
+
+main
