@@ -42,12 +42,13 @@ for i in gini_index[1]:
         year.append(i['date'])
         gini.append(i['value'])
 
-y_plt_min = min(y for y in gini if y is not None) - 3
-y_plt_max = max(y for y in gini if y is not None) + 3
+y_plt_min = min(y for y in gini if y is not None) - 2
+y_plt_max = max(y for y in gini if y is not None) + 4
 
 for i in range(len(gini)):
     if gini[i] == None:
-        gini[i] = 0
+        gini[i] = int(0)
+        continue
     gini[i] = float(gini[i])
     gini[i] = float_to_int(gini[i])
 
