@@ -5,12 +5,11 @@ global asm_main
 section .text
 
 asm_main:
-    push ebp
-    mov ebp, esp
-    fld dword [esp + 8]
-    fistp dword [int_num]
-    mov eax, [int_num]
-    inc eax
-    mov esp, ebp
-    pop ebp
+    push rbp
+    mov rbp, rsp
+    cvttss2si rax, xmm0
+    inc rax
+    mov rsp, rbp
+    pop rbp
     ret
+    
