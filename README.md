@@ -18,6 +18,7 @@ El indice o coeficiente de GINI es una medida que normalmente se utiliza para me
 Aunque el coeficiente de GINI se ultiliza sobre todo para medir la degualdad en los ingresos, tambien puede utilizarse para medir la desigualdad en la riqueza. Este uso requiere que nadie disponga de una riqueza neta negativa.
 ## Desarrollo
 
+### Python
 Los datos fueron obtenidos con Python utilizando la libreria `request` y el enlace a la informacion suministrada por [Banco Mundial](https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22) definiendo la siguente funcion:
 
 ```python
@@ -85,7 +86,12 @@ for i in gini_index[1]:
         year.append(i['date'])
         gini.append(i['value'])
 ```
-
+### C
+El codigo C `lib_float_to_int.c` se compila usando:
+```bash
+gcc -c -Wall -Werror -fpic lib_float_to_int.c
+gcc -shared -o lib_float_to_int.so lib_float_to_int.o float_to_int.o
+```
 La ultima parte es donde se utiliza la libreria `ctypes` para importar una libreria dinamica de C:
 * Linkea la libreria dinamica
 ```python
@@ -117,28 +123,70 @@ for i in range(len(country)):
     print("")
 ```
 
-El programa en C es muy simple actualmente, solo realiza un casting sumandole `0.5` al `float`. Al hacer un casting de `float` a `int` siempre redondea a la baja:
+El programa en C llama a rutina de ensamblador pasandole el numero de tipo `float` y obteniendolo en `int`:
 ```C
-#include <stdio.h>
+extern int asm_main(float);
 
 int float_to_int(float num) {
-    if (num < 0) {
-        return (int)(num - 0.5);
-    } else {
-        return (int)(num + 0.5);
-    }
+    int int_num = 0;
+    int_num = asm_main(num);
+    return int_num;
 }
 ```
-Este codigo C se compilo usando:
-```bash
-gcc -c -fPIC lib_float_to_int.c -o lib_float_to_int.o
+### Assembler 64 bits
+Se utilizo Assembler 64 bits para evitar problemas con el uso de `Python 32 bits` o librerias como `msl.loadlib`. En ASM32 se puede obtener el parametro que se paso por argumento en el codigo C a traves del `stack` pero en ASM64 esto no se puede hacer, para ello existe los registros `xmm (registros de datos de punto flotante SIMD)`. En nuestro caso, el argumento se guardo en el registro `xmm0`.
+
+Posteriormente la instruccion `cvttss2si` transforma el valor `float` en uno de tipo `int` con signo y lo guarda en el registro `rax`, para finalmente sumarle +1:
+```assembly
+section .data
+    int_num dd 0
+
+global asm_main
+section .text
+
+asm_main:
+    push rbp
+    mov rbp, rsp
+    cvttss2si rax, xmm0
+    inc rax
+    mov rsp, rbp
+    pop rbp
+    ret
 ```
+La rutina de ensamblador se compilo:
 ```bash
-gcc -shared -W -o lib_float_to_int.so lib_float_to_int.o
+nasm -f elf64 float_to_int.asm -g
 ```
+### Depuracion
+```bash
+gcc -m64 -o main float_to_int.o main.c -g
+```
+Una vez obtenido el ejecutable, se ejecuta `gdb` para debugear el programa:
+```bash
+gdb main
+(gdb) break lib_float_to_int.c:7
+(gdb) run
+```
+Se ingresa el numero de tipo `float` a convertir, por ejemplo `13.43`:
+
+![Imagen1](/img/img1.png)
+
+Como se habia mencionado anteriormente, en ASM64 los valores de tipo `float` y `double` no se pueden ver en el `stack`, pero se pueden visualizar usando `info all-registers` donde se puede ver el registro `ymm0` que representa el mismo registro fisico que `xmm0`, pero estan en diferentes modos de extension.
+
+![Imagen2](/img/img2.png)
+![Imagen3](/img/img3.png)
+
+Al seguir ejecuntado el codigo ASM con `stepi` y llegar a la direccion `0x0000555555555180` que es la direccion donde se encuentra la instruccion `ret`:
+
+![Imagen4](/img/img4.png)
+
+Se puede ver que el registro `rax` tiene el valor `14`, que seria el `float` transformado a entero y luego sumandole +1
+
+![Imagen5](/img/img5.png)
 ## Anexo
 * https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22
 * https://realpython.com/api-integration-in-python/
 * https://es.wikipedia.org/wiki/Coeficiente_de_Gini#:~:text=El%20coeficiente%20de%20Gini%20es,cualquier%20forma%20de%20distribuci%C3%B3n%20desigual.
 * https://www.redhat.com/es/topics/api/what-is-a-rest-api
 * https://stackoverflow.com/questions/14884126/build-so-file-from-c-file-using-gcc-command-line
+* https://stackoverflow.com/questions/55773868/returning-a-value-in-x86-assembly-language
