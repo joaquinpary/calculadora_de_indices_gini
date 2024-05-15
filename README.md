@@ -192,6 +192,33 @@ Al seguir ejecuntado el codigo ASM con `stepi` y llegar a la direccion `0x000055
 Se puede ver que el registro `rax` tiene el valor `14`, que seria el `float` transformado a entero y luego sumandole +1
 
 ![Imagen5](/img/img5.png)
+
+## Visualizacion RIP en Stack
+
+Se procede a analizar el `Stack` y ver la direccion de retorno al realizar una llamada a funcion:
+
+![Imagen6](/img/img6.png)
+
+Se puede ver la direccion del `call` que llama a `lib_float_to_int.c` `0x55555555523c`, entonces cuando se ejecuta la instruccion `call` se guarda la direccion `0x555555555241` en el `Stack`
+
+![Imagen7](/img/img7.png)
+
+Al ejecutar el comando `x/32xw $sp` se puede ver que en `0x7fffffffdc40` esta guardado la direccion de retorno a `main.c` 
+
+`0x7fffffffdc40: 0xffffdcd0 0x00000000 0x55555241 0x00005555`
+
+![Imagen8](/img/img8.png)
+
+De igual manera cuando en `lib_float_to_int.c` realiza una llamada a la rutina en ensamblador:
+
+![Imagen9](/img/img9.png)
+
+Se guarda en el `Stack` la direccion de retorno a `lib_float_to_int.c` de la siguente forma:
+
+`0x7fffffffdc18: 0x555551a5 0x00005555 0x00000060 0x00000000`
+
+![Imagen10](/img/img10.png)
+
 ## Anexo
 * https://api.worldbank.org/v2/en/country/all/indicator/SI.POV.GINI?format=json&date=2011:2020&per_page=32500&page=1&country=%22Argentina%22
 * https://realpython.com/api-integration-in-python/
